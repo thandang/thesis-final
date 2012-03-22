@@ -1,0 +1,41 @@
+SELECT DISTINCT thoi_khoa_bieu.ma_mh, mon_hoc.tenmh_vn, ct_dao_tao.so_tc, ct_dao_tao.tuy_chon FROM thoi_khoa_bieu,mon_hoc,ct_dao_tao,sinh_vien,diem_mon_hoc
+WHERE thoi_khoa_bieu.hoc_ky = "71"
+AND mon_hoc.mamh = thoi_khoa_bieu.ma_mh
+
+AND thoi_khoa_bieu.ma_mh = ct_dao_tao.ma_mh
+
+
+AND sinh_vien.masv = "0751120099"
+AND diem_mon_hoc.masv = sinh_vien.masv 
+
+AND (sinh_vien.ma_chuyen_nganh = ct_dao_tao.ma_chuyen_nganh
+OR ((ct_dao_tao.ma_khoa = "112" AND (ct_dao_tao.ma_chuyen_nganh = "")) OR ct_dao_tao.ma_khoa =""))
+
+AND (thoi_khoa_bieu.ma_mh NOT IN (SELECT diem_mon_hoc.ma_mh FROM sinh_vien,diem_mon_hoc
+WHERE sinh_vien.masv = "0751120099" AND diem_mon_hoc.masv = sinh_vien.masv)
+
+OR (thoi_khoa_bieu.ma_mh IN
+(SELECT DISTINCT ma_mh FROM sinh_vien,ct_dao_tao
+WHERE sinh_vien.masv = "0751120099"
+AND (sinh_vien.ma_chuyen_nganh = ct_dao_tao.ma_chuyen_nganh
+OR ((ct_dao_tao.ma_khoa = "112" AND (ct_dao_tao.ma_chuyen_nganh = "")) OR ct_dao_tao.ma_khoa ="")
+)))
+
+AND thoi_khoa_bieu.ma_mh IN (SELECT diem_mon_hoc.ma_mh FROM diem_mon_hoc WHERE diem_mon_hoc.diem < 5))
+
+
+AND (sinh_vien.masv = "0751120099" AND ct_dao_tao.ma_chuyen_nganh = sinh_vien.ma_chuyen_nganh 
+OR ((ct_dao_tao.ma_khoa = "112" AND (ct_dao_tao.ma_chuyen_nganh = "")) OR ct_dao_tao.ma_khoa =""))
+
+
+AND (thoi_khoa_bieu.ma_mh IN (SELECT ct_dao_tao.ma_mh FROM ct_dao_tao,thoi_khoa_bieu
+WHERE thoi_khoa_bieu.ma_mh = ct_dao_tao.ma_mh/* AND (ct_dao_tao.ma_tien_quyet = "" 
+
+OR (ct_dao_tao.ma_tien_quyet IN (SELECT diem_mon_hoc.ma_mh FROM diem_mon_hoc,sinh_vien
+WHERE diem_mon_hoc.diem >= 5 AND sinh_vien.masv = "0751120099"
+AND sinh_vien.masv = diem_mon_hoc.masv
+))
+*/
+))
+
+;
