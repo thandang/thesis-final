@@ -1,0 +1,46 @@
+public TrainingSubjects[] getSuggestSubject1(String masv, String hocki, String ma_khoa)
+    {
+        TrainingSubjects subject[] = null;
+
+        String sql ="";
+        sql += "SELECT thoi_khoa_bieu.ma_mh,tenmh_vn, thoi_khoa_bieu.so_tc, ct_dao_tao.tuy_chon  FROM thoi_khoa_bieu,mon_hoc,ct_dao_tao,sinh_vien,diem_mon_hoc) "
+                + "WHERE thoi_khoa_bieu.hoc_ky = '" + hocki + "' ";
+        sql += " AND mon_hoc.mamh = thoi_khoa_bieu.ma_mh";
+        sql += " AND thoi_khoa_bieu.ma_mh= ct_dao_tao.ma_mh";
+        sql += " AND sinh_vien.masv = '"+ masv +"' AND diem_mon_hoc.masv = sinh_vien.masv ";
+        sql += " AND (sinh_vien.ma_chuyen_nganh = ct_dao_tao.ma_chuyen_nganh ";
+        sql += " OR ((ct_dao_tao.ma_khoa = '"+ ma_khoa +"' AND (ct_dao_tao.ma_chuyen_nganh = '')) OR ct_dao_tao.ma_khoa =''))";
+        sql += " AND (thoi_khoa_bieu.ma_mh NOT IN (SELECT diem_mon_hoc.ma_mh FROM sinh_vien,diem_mon_hoc";
+        sql += " WHERE sinh_vien.masv = '"+ masv+ "' AND diem_mon_hoc.masv = sinh_vien.masv)";
+        sql += " OR (thoi_khoa_bieu.ma_mh IN (SELECT DISTINCT ma_mh FROM sinh_vien,ct_dao_tao WHERE sinh_vien.masv = '"+ masv +"";
+        sql += " AND (sinh_vien.ma_chuyen_nganh = ct_dao_tao.ma_chuyen_nganh OR "
+                + "((ct_dao_tao.ma_khoa = '"+ ma_khoa +"' AND (ct_dao_tao.ma_chuyen_nganh = '')) OR ct_dao_tao.ma_khoa ='')";
+        sql += " AND thoi_khoa_bieu.ma_mh IN (SELECT diem_mon_hoc.ma_mh FROM diem_mon_hoc WHERE diem_mon_hoc.diem < 5))";
+        sql += " AND (sinh_vien.masv = '"+ masv +"' AND ct_dao_tao.ma_chuyen_nganh = sinh_vien.ma_chuyen_nganh";
+        sql += " OR ((ct_dao_tao.ma_khoa = '"+ ma_khoa+"' AND (ct_dao_tao.ma_chuyen_nganh = '')) OR ct_dao_tao.ma_khoa =''))";
+        sql += " AND (thoi_khoa_bieu.ma_mh IN (SELECT ct_dao_tao.ma_mh FROM ct_dao_tao,thoi_khoa_bieu WHERE thoi_khoa_bieu.ma_mh = ct_dao_tao.ma_mh)))";
+//        dbConnect.setQueryString(sb.toString());
+        dbConnect.setQueryString(sql);                
+        dbConnect.executeQuery();
+        if (dbConnect.getRowCount() <= 0) {
+            return null;
+        }
+        subject = new TrainingSubjects[dbConnect.getRowCount()];
+        ResultSet resultset = dbConnect.getResultSet();
+
+        try {
+            int count = 0;
+            while (resultset.next()) {
+                subject[count] = new TrainingSubjects();
+                subject[count].ma_mh = resultset.getString("ma_mh");
+                subject[count].tenmh = resultset.getString("tenmh_vn");
+                subject[count].sotc = resultset.getFloat("so_tc") + "";
+                subject[count].tuyChon = resultset.getBoolean("tuy_chon") + "";
+                count++;
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(DBProcess.class.getName()).log(Level.SEVERE, null, ex);
+            ex.printStackTrace();
+        }
+        return subject;
+    }
